@@ -37,6 +37,6 @@ This is a bash script that will automatically turn your wifi off if you connect 
 
 ## Misc
 
-To install terminal-notifier by "brew install terminal-notifer"
+To install terminal-notifier run "brew install terminal-notifer"
 
-To debug, just run: `sudo /Library/Scripts/toggleAirport.sh` and add echo's wherever you'd like
+To debug, just run: `sudo /Library/Scripts/toggleAirport.sh` and add echo's wherever you'd like, or you can put file 'statusChanged.sh' under same directory (/Library/Scripts/) and let it put the status change msg to wherever you like.
