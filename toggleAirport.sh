@@ -16,8 +16,12 @@ function set_airport {
 
 }
 
-function growl {
-    /usr/bin/osascript -e "display notification \"$1\" with title \"Wifi Toggle\" sound name \"Hero\""
+function notify {
+    if [[ -f "/usr/local/bin/terminal-notifier" ]]; then
+      /usr/local/bin/terminal-notifier -title "Wifi Toggle" -message \"$1\" -timeout 3 >/dev/null 2>&1 &
+    else
+      /usr/bin/osascript -e "display notification \"$1\" with title \"Wifi Toggle\" sound name \"Hero\""
+    fi
 }
 
 # Set default values
@@ -68,12 +72,12 @@ if [ "$prev_eth_status" != "$eth_status" ]; then
     if [ "$eth_status" = "On" ]; then
         if [ "$prev_air_status" != "Off" ]; then
           set_airport "Off"
-          growl "Wired network detected. Turning AirPort off."
+          notify "Wired network detected. Turning AirPort off."
         fi
     else
         if [ "$prev_air_status" = "Off" ]; then
           set_airport "On"
-          growl "No wired network detected. Turning AirPort on."
+          notify "No wired network detected. Turning AirPort on."
         fi
     fi
 
@@ -86,9 +90,9 @@ else
     set_airport $air_status
 
     if [ "$air_status" = "On" ]; then
-        growl "AirPort manually turned on."
+        notify "AirPort manually turned on."
     else
-        growl "AirPort manually turned off."
+        notify "AirPort manually turned off."
     fi
 
     fi
