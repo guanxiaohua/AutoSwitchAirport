@@ -1,19 +1,34 @@
 #!/bin/bash
 
-function set_airport {
-
+function mark_airport {
     new_status=$1
-
     if [ $new_status = "On" ]; then
-        /usr/sbin/networksetup -setairportpower $air_name on
         touch /var/tmp/prev_air_on
     else
-        /usr/sbin/networksetup -setairportpower $air_name off
         if [ -f "/var/tmp/prev_air_on" ]; then
             rm /var/tmp/prev_air_on
         fi
     fi
+}
 
+function mark_eth {
+    new_status=$1
+    if [ $new_status = "On" ]; then
+        touch /var/tmp/prev_eth_on
+    else
+        if [ -f "/var/tmp/prev_eth_on" ]; then
+            rm /var/tmp/prev_eth_on
+        fi
+    fi
+}
+
+function set_airport {
+    new_status=$1
+    if [ $new_status = "On" ]; then
+        /usr/sbin/networksetup -setairportpower $air_name on
+    else
+        /usr/sbin/networksetup -setairportpower $air_name off
+    fi
 }
 
 function notify {
@@ -66,17 +81,22 @@ if [ -f "${SCRIPTPATH}/statusChanged.sh" ]; then
  fi
 fi
 
+# Update ethernet status
+mark_eth $eth_status
+
 # Determine whether ethernet status changed
 if [ "$prev_eth_status" != "$eth_status" ]; then
 
     if [ "$eth_status" = "On" ]; then
         if [ "$prev_air_status" != "Off" ]; then
           set_airport "Off"
+          mark_airport "Off"
           notify "Wired network detected. Turning AirPort off."
         fi
     else
         if [ "$prev_air_status" = "Off" ]; then
           set_airport "On"
+          mark_airport "On"
           notify "No wired network detected. Turning AirPort on."
         fi
     fi
@@ -87,25 +107,14 @@ else
     # Check whether AirPort status changed
     # If so it was done manually by user
     if [ "$prev_air_status" != "$air_status" ]; then
-    set_airport $air_status
-
-    if [ "$air_status" = "On" ]; then
-        notify "AirPort manually turned on."
-    else
-        notify "AirPort manually turned off."
+    	mark_airport $air_status
+    	if [ "$air_status" = "On" ]; then
+        	notify "AirPort manually turned on."
+    	else
+        	notify "AirPort manually turned off."
+    	fi
     fi
 
-    fi
-
-fi
-
-# Update ethernet status
-if [ "$eth_status" == "On" ]; then
-    touch /var/tmp/prev_eth_on
-else
-    if [ -f "/var/tmp/prev_eth_on" ]; then
-        rm /var/tmp/prev_eth_on
-    fi
 fi
 
 exit 0
